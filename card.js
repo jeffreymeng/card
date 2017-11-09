@@ -59,10 +59,9 @@
         //Card Constants
         Card.TYPE = {
             STANDARD: 0,
-            POKER: 0,
-            CUSTOM: 1
+            POKER: 0
         };
-        // Suit constants. This makes it much easier to read.
+        // Suit constants. This makes it much more intuitive to read.
         Card.SUIT = {
             CLUBS: 1,
             CLUB: 1,
@@ -73,9 +72,18 @@
             SPADES: 4,
             SPADE: 4
         };
-
+        Card.Type = function(traits) {
+            if (!(this instanceof Card.Type)) {
+                warn("You did not create an new instance of Card.Type when calling Card.Type(). " +
+                    "A new instance has been returned, but you should alter your source code. Refer " +
+                    "to the documentation for more information.");
+                return new Card.Type(traits);
+            }
+            return [];
+            
+        }
         //Card constructor
-        Card.Card = function(options) {
+        Card.Card = function(clone, options) {
             //make sure they create a new instance
             if (!(this instanceof Card.Card)) {
                 warn("You did not create an new instance of Card.Card when calling Card.Card(). " +
@@ -90,10 +98,11 @@
             }
             
             */
+            
             //merge the defualt options with the user inputed options.
             merge({
-                suit:null,
-                location:null
+                location:null,
+                type:Card.TYPE.STANDARD
             }, options);
             this.test = function() {
                 return cards.length;
