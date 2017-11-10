@@ -1,152 +1,147 @@
-//card.js
-(function(window) {
-    'use strict';
+import * as Util from '/util.js';
 
-    function define() {
+
+/**
+ * Internal list of cards and decks
+ * @type {Object}
+ */
+let Internal = {
+    cards: [], //to allow array to refrence card, cards are stored inside an internal array
+    decks: []
+};
+
+
+//Card Constants
+let TYPE = {
+    STANDARD: Symbol('standard'),
+    POKER: Symbol('poker')
+};
+// Suit constants. This makes it much more intuitive to read.
+let SUIT = {
+    CLUB: Symbol('club'),
+    DIAMOND: Symbol('diamond'),
+    HEART: Symbol('heart'),
+    SPADE: Symbol('spade')
+};
+let NUMBER = {
+    1: Symbol('1'),
+    2: Symbol('2'),
+    3: Symbol('3'),
+    4: Symbol('4'),
+    5: Symbol('5'),
+    6: Symbol('6'),
+    7: Symbol('7'),
+    8: Symbol('8'),
+    9: Symbol('9'),
+    10: Symbol('10'),
+    JACK: Symbol('jack'),
+    QUEEN: Symbol('queen'),
+    KING: Symbol('king'),
+    JOKER: Symbol('joker'),
+};
+
+
+function getInternal() {
+    return Internal;
+}
+
+
+/**
+ * One card
+ */
+class Card {
+   /**
+    * Makes a card
+    * @param  {Object}      options                           Options
+    * @param  {Card.TYPE}   [options.type=Card.TYPE.standard] Type of card
+    * @param  {Card.SUIT}   [options.suit]                    Suit of the card
+    * @param  {Card.NUMBER} [options.number]                  Number of the card
+    */
+    constructor(options) {
+        //merge the defualt options with the user inputed options.
         /**
-         * Util functions, internal use only
+         * Data of card
          * @type {Object}
          */
-        let Util = {
-            /**
-             * Randomly shuffle an array using Fisher-Yates (https://stackoverflow.com/a/2450976/5511561)
-             * @param  {Array} array Input array to be shuffled
-             * @return {Array}       Shuffled array
-             */
-            shuffle: array => {
-                let currentIndex = array.length;
-                let temporaryValue;
-                let randomIndex;
+        this.options = Util.merge({ // merge with default array
+            type: TYPE.STANDARD
+        }, options);
 
-                // While there remain elements to shuffle...
-                while (0 !== currentIndex) {
+        Internal.cards.push(this); //add this to the card array. Changes are reflected.
+        /**
+         * Index of card in Internal card array
+         * @private
+         * @type {Number}
+         */
+        this.internalID = Internal.cards.length - 1;
+    }
+    
+    /**
+     * Get string name of the card
+     * @return {String} The name of the card
+     */
+    getString() {
+        return `${this.options.number.toString().slice(7, -1)} of ${this.options.suit.toString().slice(7, -1)}`;
+    }
+}
 
-                    // Pick a remaining element...
-                    randomIndex = Math.floor(Math.random() * currentIndex);
-                    currentIndex -= 1;
-
-                    // And swap it with the current element.
-                    temporaryValue = array[currentIndex];
-                    array[currentIndex] = array[randomIndex];
-                    array[randomIndex] = temporaryValue;
-                }
-
-                return array;
-            },
-            /**
-             * Merges 2 objects. If the same key exists for both, 2nd object
-             * overwrites first one
-             * @param  {Object} obj1 First object
-             * @param  {Object} obj2 Second object
-             */
-            merge: (obj1, obj2) => {
-                let obj3 = {};
-                for (let attrname in obj1) {
-                    obj3[attrname] = obj1[attrname];
-                }
-                for (let attrname in obj2) {
-                    obj3[attrname] = obj2[attrname];
-                }
-                return obj3;
-            },
-            /**
-             * Warn the user using the console
-             * @param  {String} msg Message to warn the user
-             */
-            warn: msg => {
-                if (console.warn) {
-                    console.warn("Card.JS Warning: " + msg);
-                } else {
-                    console.log("Card.JS Warning: " + msg);
-                }
-            }
-        };
+/**
+ * A deck of cards
+ */
+class Deck {
+    /**
+     * Makes a deck of cards. Basically an array of cards
+     */
+    constructor() {
+        this.cards = [];
+        this.internalID = Internal.decks.length - 1;
+    }
+    
+    /**
+     * Add card to deck
+     * @param {Card} card Card to add
+     */
+    add(card) {
+        this.cards.push(card);
+    }
+    
+    /**
+     * Removes a card from the deck. If more than one of the card,
+     * it removes the first one
+     * @param  {Card} card Card to be removed
+     * @return {Card}      Card that was removed
+     */
+    remove(card) {
+        const index = this.cards.find(card);
         
-        class CardJSException {
-            constructor(msg) {
-                this.message = msg;
-            }
-            
-            toString() {
-                return this.message;
-            }
+        if (index != -1) {
+            return array.splice(index, 1);
+        } else {
+            Util.warn(card.getString() + ' is not in deck id ' + this.internalID);
+            return null;
+        }
+    }
+    
+    /**
+     * Shuffle the deck. Rearrange the order of the cards in place
+     */
+    shuffle() {
+        this.cards = Util.shuffle(this.cards);
+    }
+    
+    /**
+     * Gets string of all cards
+     * @return {String} String of all cards
+     */
+    getString() {
+        let str = '';
+        for (let card of this.cards) {
+            str += card.getString() + '\n';
         }
         
-        
-        /**
-         * Internal list of cards and decks
-         * @type {Object}
-         */
-        let Internal = {
-            cards: [], //to allow array to refrence card, cards are stored inside an internal array
-            decks: []
-        };
-        
-        
-        /**
-         * Card library
-         * @type {Object}
-         */
-        let Card = {
-            //Card Constants
-            TYPE: {
-                STANDARD: Symbol('standard'),
-                POKER: Symbol('poker')
-            },
-            // Suit constants. This makes it much more intuitive to read.
-            SUIT: {
-                CLUB: Symbol('club'),
-                DIAMOND: Symbol('diamond'),
-                HEART: Symbol('heart'),
-                SPADE: Symbol('spade')
-            },
-            Type: traits => {
-                if (!(this instanceof Card.Type)) {
-                    Util.warn("You did not create an new instance of Card.Type when calling Card.Type(). " +
-                        "A new instance has been returned, but you should alter your source code. Refer " +
-                        "to the documentation for more information.");
-                    return new Card.Type(traits);
-                }
-                return [];
-                
-            },
-            //Card constructor
-            Card: class {
-                /*options:
-                {
-                    location:(null, deck),
-                    type: (Card.type.standard)
-                }
-                
-                */
-               /**
-                * Makes a card
-                * @param  {Boolean} clone   Clone the card
-                * @param  {Object}  options Options
-                * @param  {Deck}    options.location
-                */
-                constructor(clone, options) {
-                    //merge the defualt options with the user inputed options.
-                    Util.merge({
-                        location: null,
-                        type: Card.TYPE.STANDARD
-                    }, options);
+        return str;
+    }
+}
 
-                    Internal.cards.push(this); //add this to the card array. Changes are reflected.
-                    this.CardJSID = Internal.cards.length - 1; //the index of the last element in the array.
-                }
-            },
-            getInternal: () => {
-                return Internal;
-            }
-        };
-        
-        return Card;
-    }
-    // define globally if it doesn't already exist
-    if (typeof(Card) === 'undefined') {
-        window.Card = define();
-    } else {
-        console.log("Card already defined.");
-    }
-})(window);
+
+export {TYPE, SUIT, NUMBER, getInternal, Card, Deck};
