@@ -72,6 +72,7 @@ class Card {
     }
     
     addTo(deck) {
+    	
     	deck.__add(this.id);
     	this.location = deck.id;
     }
@@ -103,10 +104,11 @@ class Deck {
     /** 
      * Add a card. This is the equivilant of calling .addTo on each given card.
      * @param{Card|Card[]...} Cards to add. 
-     * Accepts an infinite number of parameters, which must be cards or arrays of cards. 
+     * Accepts an infinite number of parameters, each can be either a Card or an Card[]. If it is a Card[], all cards within the
+     * array will be added.
      * Note that you do not have to remove a card from a deck before adding it. It is done automatically.
      */
-     //not sure if above jsdoc is valid
+     //not sure if above jsdoc is valid(the {Card|Card...} part)
     addCard() {
     	
     	for (let i =0;i < arguments.length; i ++) {
@@ -124,13 +126,59 @@ class Deck {
     /**
      * Shuffle the deck. Rearrange the order of the cards in place
      * @param {int} times The number of times to shuffle
+     * Note that shuffling mutiple times does not bear a significant benefit to suffling just one time.
      */
     shuffle(times) {
+    	times = times || 1;// You don't have to include the times parameter
     	for (let i = 0; i < times; i ++) {
         this.cards = Util.shuffle(this.cards);
     	}
     }
     
+    /**
+     * Gets the card at the given index.
+     * @param {int} index - Required: The index of the requested element.
+     * 
+     * 
+     */
+     cardAt(index) {
+     	return this.cards[index];
+     }
+     
+     //returns the length of an array. Two ways to do this.
+     get length() {
+     	return this.cards.length;
+     }
+     /**
+      * Returns the length of the array
+      * 
+      * 
+      */
+     length() {
+     	return this.length;
+     }
+     
+     /**
+      * Removes the last card from the deck and returns it.
+      * 
+      * 
+      */
+     shift() {
+     	var shifted = cards.shift();
+     	shifted.removeFromDeck();
+     	return shifted;
+     }
+     /**
+      * Sorts the deck.
+      * @param {function}.
+      * 
+      */
+     sort(callback) {
+     	this.sort(function(a, b) {
+     		return callback(this.cards[a], this.cards[b]);
+     	});
+     }
+     
     /**
      * Gets string of all cards
      * @return {String} String of all cards
