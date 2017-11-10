@@ -79,7 +79,7 @@
                     "to the documentation for more information.");
                 return new Card.Type(traits);
             }
-            return [];
+            
             
         }
         //Card constructor
